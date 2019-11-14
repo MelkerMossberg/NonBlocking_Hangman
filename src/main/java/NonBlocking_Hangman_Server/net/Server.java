@@ -99,12 +99,12 @@ public class Server implements Runnable {
         socketChannel.configureBlocking(false);
 
         // Add a operation to the Selector. It should be a write-operation
-        SelectionKey readKey = socketChannel.register(selector, SelectionKey.OP_WRITE);
+        SelectionKey socketKey = socketChannel.register(selector, SelectionKey.OP_WRITE);
 
         // Start a clientSession (which is identified by its socketChannel). Add this to a hash-map of clients.
-        clientMap.put(readKey, new ClientSession(readKey, socketChannel));
+        clientMap.put(socketKey, new ClientSession(socketKey, socketChannel));
 
-        String messageFromClient = clientMap.get(readKey).handleClientAction(null);
+        String messageFromClient = clientMap.get(socketKey).handleClientAction(null);
         String message = messageFromClient;
         byte[] messageBytes = message.getBytes();
         dataToBeHandled.put(socketChannel, messageBytes);
