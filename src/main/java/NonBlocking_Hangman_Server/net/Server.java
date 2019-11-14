@@ -104,9 +104,8 @@ public class Server implements Runnable {
         // Start a clientSession (which is identified by its socketChannel). Add this to a hash-map of clients.
         clientMap.put(socketKey, new ClientSession(socketKey, socketChannel));
 
-        String messageFromClient = clientMap.get(socketKey).handleClientAction(null);
-        String message = messageFromClient;
-        byte[] messageBytes = message.getBytes();
+        String messageToClient = clientMap.get(socketKey).handleClientAction(null);
+        byte[] messageBytes = messageToClient.getBytes();
         dataToBeHandled.put(socketChannel, messageBytes);
     }
 
