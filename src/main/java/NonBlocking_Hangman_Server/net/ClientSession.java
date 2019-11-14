@@ -2,14 +2,14 @@ package NonBlocking_Hangman_Server.net;
 
 import NonBlocking_Hangman_Server.game.GameHandler;
 
-import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 public class ClientSession {
+
     SelectionKey selectionKey;
     SocketChannel socketChannel;
-    private final static int LOGIN = 0, GAME_START = 1, KEEP_GUESSING = 2, GAME_LOST = 3,  QUIT = 4;
+    private final static int LOGIN = 0, GAME_START = 1, KEEP_GUESSING = 2;
     private int state;
     private AuthHandler authHandler;
     private GameHandler gameHandler;
@@ -18,12 +18,11 @@ public class ClientSession {
         this.selectionKey = selectionKey;
         this.socketChannel = socketChannel;
         state = LOGIN;
-
         authHandler = new AuthHandler();
         gameHandler = new GameHandler();
     }
 
-    public String handleClientAction(byte[] data) {
+    String handleClientAction(byte[] data) {
         switch (state){
             case LOGIN: {
                 String output = authHandler.handleLogin(data);

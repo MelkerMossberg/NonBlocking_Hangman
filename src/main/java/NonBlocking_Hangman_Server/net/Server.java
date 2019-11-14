@@ -18,20 +18,17 @@ public class Server implements Runnable {
         server.start();
     }
 
-    public final static String HOSTNAME = "127.0.0.1";
-    public final static int PORT = 44444;
-    public final static long TIMEOUT = 10000;
+    private final static String HOSTNAME = "127.0.0.1";
+    private final static int PORT = 44444;
+    private final static long TIMEOUT = 10000;
 
     private ServerSocketChannel serverChannel;
     private Selector selector;
 
-    private Map<SocketChannel, byte[]> dataTracking = new HashMap<>();
-    final static HashMap<SelectionKey, ClientSession> clientMap = new HashMap<>();
+    private Map<SocketChannel, byte[]> dataToBeHandled = new HashMap<>();
+    private final static HashMap<SelectionKey, ClientSession> clientMap = new HashMap<>();
 
-    public Server()
-    {
-        init();
-    }
+    private Server() { init(); }
 
     private void init() {
         System.out.println("initializing server");
@@ -101,22 +98,23 @@ public class Server implements Runnable {
         SocketChannel socketChannel = serverSocketChannel.accept();
         socketChannel.configureBlocking(false);
 
+        // Add a operation to the Selector. It should be a write-operation
         SelectionKey readKey = socketChannel.register(selector, SelectionKey.OP_WRITE);
+
+        // Start a clientSession (which is identified by its socketChannel). Add this to a hash-map of clients.
         clientMap.put(readKey, new ClientSession(readKey, socketChannel));
 
-
         String messageFromClient = clientMap.get(readKey).handleClientAction(null);
-
-        String message = messageFromClient + "   Connections = " + clientMap.size() + "\n";
-        byte[] hello = message.getBytes();
-        dataTracking.put(socketChannel, hello);
+        String message = messageFromClient;
+        byte[] messageBytes = message.getBytes();
+        dataToBeHandled.put(socketChannel, messageBytes);
     }
 
     private void write(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
 
-        byte[] data = dataTracking.get(channel);
-        dataTracking.remove(channel);
+        byte[] data = dataToBeHandled.get(channel);
+        dataToBeHandled.remove(channel);
 
         // NIO Writes to the clientChannel
         System.out.println("Server Respond: " + new String(data));
@@ -169,7 +167,7 @@ public class Server implements Runnable {
         byte[] byteResponse = response.getBytes();
 
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        dataTracking.put(socketChannel, byteResponse);
+        dataToBeHandled.put(socketChannel, byteResponse);
         key.interestOps(SelectionKey.OP_WRITE);
     }
 
