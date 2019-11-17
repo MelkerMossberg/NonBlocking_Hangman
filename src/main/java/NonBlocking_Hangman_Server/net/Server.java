@@ -18,7 +18,7 @@ public class Server implements Runnable {
         server.start();
     }
 
-    private final static String HOSTNAME = "127.0.0.1";
+    private final static String HOSTNAME = "localhost";
     private final static int PORT = 44444;
     private final static long TIMEOUT = 10000;
 
@@ -162,7 +162,7 @@ public class Server implements Runnable {
     }
 
     private void respond(SelectionKey key, byte[] data) {
-        String response = clientMap.get(key).handleClientAction(data);
+        String response = clientMap.get(key).handleClientAction(data) + "\n";
         byte[] byteResponse = response.getBytes();
 
         SocketChannel socketChannel = (SocketChannel) key.channel();

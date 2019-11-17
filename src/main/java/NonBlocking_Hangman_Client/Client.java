@@ -1,5 +1,7 @@
 package NonBlocking_Hangman_Client;
 
+import NonBlocking_Hangman_Client.net.ConnectionHandler;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
@@ -14,8 +16,7 @@ public class Client {
 
     public Client(){
         try{
-            Socket socket = new Socket("127.0.0.1", 44444);
-            socket.getKeepAlive();
+            Socket socket = new Socket("localhost", 44444);
             cc = new ConnectionHandler(socket, this);
             cc.start();
 

@@ -26,6 +26,7 @@ public class ClientSession {
         switch (state){
             case LOGIN: {
                 String output = authHandler.handleLogin(data);
+                System.out.println(output);
                 if (output.equals("Login success")) {
                     state = GAME_START;
                     return handleClientAction(null);
