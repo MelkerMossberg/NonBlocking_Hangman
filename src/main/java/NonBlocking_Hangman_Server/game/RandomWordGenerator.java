@@ -17,6 +17,7 @@ public class RandomWordGenerator {
         random = new Random();
         list = new ArrayList<>();
 
+
         File file = new File("words.txt");
         FileReader fr = null;
         try {

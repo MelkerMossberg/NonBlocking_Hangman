@@ -15,7 +15,7 @@ public class InputHandler {
     JSONParser jsonParser;
     Client client;
     View view;
-    public String jwt;
+    String jwt;
 
     InputHandler(Client client){
         this.jsonParser = new JSONParser();
@@ -34,10 +34,10 @@ public class InputHandler {
             case "login":
                 System.out.println(message.get("body").toString());
                 break;
-            case "loginSuccess":
-                jwt = message.get("body").toString();
-                break;
             case "game":
+                if (message.get("jwt") != null)
+                    this.jwt = message.get("jwt").toString();
+
                 String body = message.get("body").toString();
                 controlByteLength(body, Integer.parseInt(message.get("content-length").toString()));
                 GameStateDTO gameState = readGameState(body);
@@ -51,7 +51,7 @@ public class InputHandler {
         System.out.println("Measured: " + measuredLength + ", Promised: " + promisedLength);
         return measuredLength == promisedLength;
     }
-    private int measureStringByteLength(String inputBody) {
+    int measureStringByteLength(String inputBody) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream;
         try {

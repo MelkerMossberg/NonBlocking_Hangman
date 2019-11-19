@@ -3,6 +3,7 @@ package NonBlocking_Hangman_Client;
 
 import NonBlocking_Hangman_Client.view.GameStateDTO;
 import NonBlocking_Hangman_Client.view.View;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.IOException;
@@ -18,6 +19,8 @@ import java.util.Scanner;
 
 public class Client implements Runnable {
 
+    private String jwt;
+
     public static void main(String[] args) {
         Thread client = new Thread(new Client());
         client.start();
@@ -30,18 +33,11 @@ public class Client implements Runnable {
     private SocketChannel socketChannel;
     private Selector selector;
 
-    View view;
-    GameStateDTO gameStateDTO;
-    private JSONParser jsonParser;
     private InputHandler inputHandler;
     private Map<SocketChannel, byte[]> dataToBeHandled = new HashMap<>();
 
     private Client() {
         init();
-        view = new View();
-        inputHandler = new InputHandler(this);
-        gameStateDTO = new GameStateDTO();
-        jsonParser = new JSONParser();
     }
 
     private void init() {
@@ -57,7 +53,6 @@ public class Client implements Runnable {
             selector = Selector.open();
             //Tell the SelectionKey that the serverSocketChannel should be used to accept connections.
             socketChannel.register(selector, SelectionKey.OP_CONNECT);
-            System.out.println("OP_Connect");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,6 +101,7 @@ public class Client implements Runnable {
 
     private void connect(SelectionKey key) throws IOException {
         socketChannel.finishConnect();
+        inputHandler = new InputHandler(this);
         key.interestOps(SelectionKey.OP_READ);
     }
 
@@ -139,7 +135,7 @@ public class Client implements Runnable {
         }
 
         if (read == -1) {
-            System.out.println("Nothing was there to be read, closing connection");
+            System.out.println("Connection to server closed");
             channel.close();
             key.cancel();
             return;
@@ -157,8 +153,9 @@ public class Client implements Runnable {
 
     private void prepareNextOutput(SelectionKey key) {
         String response = readKeyboardInput();
+        String JSONResponse = packageJSON(response);
 
-        byte[] byteResponse = response.getBytes();
+        byte[] byteResponse = JSONResponse.getBytes();
 
         SocketChannel socketChannel = (SocketChannel) key.channel();
         dataToBeHandled.put(socketChannel, byteResponse);
@@ -183,5 +180,14 @@ public class Client implements Runnable {
             String userInput = console.nextLine();
             return userInput;
         } else return readKeyboardInput();
+    }
+
+    public String packageJSON(String body){
+        JSONObject message = new JSONObject();
+        message.put("jwt", inputHandler.jwt);
+        message.put("body", body);
+        message.put("content-length", inputHandler.measureStringByteLength(body));
+
+        return message.toJSONString();
     }
 }
