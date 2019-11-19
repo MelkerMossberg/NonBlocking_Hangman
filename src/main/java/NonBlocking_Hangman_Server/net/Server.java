@@ -1,7 +1,11 @@
 package NonBlocking_Hangman_Server.net;
 
+import org.json.simple.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-        import java.net.InetSocketAddress;
+import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
         import java.nio.ByteBuffer;
         import java.nio.channels.SelectionKey;
         import java.nio.channels.Selector;
@@ -14,7 +18,7 @@ import java.io.IOException;
 public class Server implements Runnable {
 
     public static void main(String[] args) {
-        Thread server = new Thread(new Server());
+        Thread server = new Thread(new NonBlocking_Hangman_Server.net.Server());
         server.start();
     }
 
@@ -67,12 +71,10 @@ public class Server implements Runnable {
                     if (!key.isValid()) {
                         continue;
                     }
-
                     if (key.isAcceptable()) {
                         System.out.println("Accepting connection");
                         accept(key);
                     }
-
                     if (key.isWritable()) {
                         String client = clientMap.get(key).socketChannel.getRemoteAddress().toString();
                         System.out.println("Writing to..." + client);
@@ -162,7 +164,7 @@ public class Server implements Runnable {
     }
 
     private void respond(SelectionKey key, byte[] data) {
-        String response = clientMap.get(key).handleClientAction(data) + "\n";
+        String response = clientMap.get(key).handleClientAction(data);
         byte[] byteResponse = response.getBytes();
 
         SocketChannel socketChannel = (SocketChannel) key.channel();

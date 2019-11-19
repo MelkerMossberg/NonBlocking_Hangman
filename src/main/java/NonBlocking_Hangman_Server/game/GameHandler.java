@@ -12,7 +12,8 @@ public class GameHandler {
     public String startFirstGame() {
         gameState = new GameState(RandomWord(), 0, null);
         gameState.state = "LETTER_GUESS";
-        return gameState.packageJSON();
+        String game = gameState.packageJSON();
+        return game;
     }
 
     public String startAnotherGame(String gameResult) {
